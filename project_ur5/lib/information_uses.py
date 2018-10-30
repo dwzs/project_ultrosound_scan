@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import rospy, sys
+import rospy, sys, math
 import moveit_commander
 from moveit_msgs.msg import RobotTrajectory
 from trajectory_msgs.msg import JointTrajectoryPoint
@@ -70,17 +70,27 @@ class Information_uses:
             rospy.loginfo("Path execution complete.")
         else:
             rospy.loginfo("Path planning failed with only " + str(fraction) + " success after " + str(maxtries) + " attempts.")  
-        # moveit_commander.roscpp_shutdown()
-        # moveit_commander.os._exit(0)       
+        moveit_commander.roscpp_shutdown()
+        moveit_commander.os._exit(0)       
+    
+    def move_adjust(self,information_adjust):  ###information_adjust:[x,y,z,ox,oy,oz,theta]
+        pose_target_tcp = Tools.information_adjust_to_quat(information_adjust)
+        pose_target_base = Tools.transform_pose_tcp_to_base(pose_target_tcp)
+        self.movej_target(pose_target_base)
+        # print 'pose_target_tcp',pose_target_tcp
+        # print 'pose_target_base',pose_target_base
 
 if __name__ == "__main__":
     rospy.init_node('demo_information_uses')
     information_uses = Information_uses()
 
-    demo_list_pose_target1 = [0.3, 0.5, 0.6, 0, 0, 0, 1]
-    demo_list_pose_target2 = [0.4, 0.5, 0.5, 0, 0, 0, 1]
-    demo_list_pose_target3 = [0.5, 0.5, 0.6, 0, 0, 0, 1]
+    demo_list_pose_target1 = [0.3, 0.4, 0.65, 0, 0, 0, 1]
+    demo_list_pose_target2 = [0.4, 0.4, 0.55, 0, 0, 0, 1]
+    demo_list_pose_target3 = [0.5, 0.4, 0.65, 0, 0, 0, 1]
     demo_lists_poses_target = [demo_list_pose_target1, demo_list_pose_target2, demo_list_pose_target3]
+    demo_information_adjust = [0.1, 0, 0, 0, 0, 0, math.pi/4]
+
 
     # information_uses.movej_target(demo_list_pose_target1)
-    information_uses.movep_targets(demo_lists_poses_target)    
+    # information_uses.movep_targets(demo_lists_poses_target)    
+    information_uses.move_adjust(demo_information_adjust)        
